@@ -1,34 +1,34 @@
 # Cluster API Control Plane Provider Kamaji
 Kamaji is an Open-Source project offering hosted Kubernetes control planes, the Control Plane is running in a management cluster as regular pods.
 
+`Reference` https://github.com/clastix/cluster-api-control-plane-provider-kamaji
 
-Prequirement :
-- Make sure Kamaji cluster already create first. 
-  Documentation : https://kamaji.clastix.io/getting-started/
+
+`Prequirement :`
+- Make sure Kamaji cluster already create first.
+  `Documentation` : https://kamaji.clastix.io/getting-started/
 - Install clusterctl on Kamaji Cluster
-  Documentation : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
+  `Documentation` : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
 - Install Cluster API on Kamaji Cluster
-  Documentation : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start
+  `Documentation` : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start
 - Install Cluster API controlplane Kamaji on Kamaji Cluster
-  Documentation : https://github.com/clastix/cluster-api-control-plane-provider-kamaji
-  Documentation : https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
+  `Documentation` : https://github.com/clastix/cluster-api-control-plane-provider-kamaji
+  `Documentation` : https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
 
 ## Install Cluster API on Kamaji Cluster
-Reference https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
+`Reference` https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
 ```
-- Export Kubeconfig:
+# Export Kubeconfig:
 export KUBECONFIG=/home/ubuntu/.kube/config
 
-- Install clusterctl Binary:
+# Install clusterctl Binary:
 curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.7.6/clusterctl-linux-amd64 -o clusterctl
 sudo install -o root -g root -m 0755 clusterctl /usr/local/bin/clusterctl
 clusterctl version
 
-- Initialize the Management cluster:
+# Initialize the Management cluster:
 # Reference https://main.cluster-api.sigs.k8s.io/user/quick-start#initialize-the-management-cluster
 export CLUSTER_TOPOLOGY=true
-
-# This will install the latest cluster-api provider version
 clusterctl init --infrastructure openstack
 
 # Cluster API controlplane kamaji have compability matric that you can show the link below
@@ -46,7 +46,7 @@ clusterctl init --core cluster-api:v1.7.5 --bootstrap kubeadm:v1.7.5 --control-p
 ```
 
 ## Install Cluster API controlplane Kamaji on Kamaji Cluster
-Reference https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
+`Reference` https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
 ```
 cat ~/.cluster-api/clusterctl.yaml
 providers:
@@ -83,7 +83,7 @@ clouds:
 ```
 
 ### Create secret in kamaji that store cloud.yaml file :
-Reference is here https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#required-configuration-for-common-providers
+`Reference` is here https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#required-configuration-for-common-providers
 ```
 cat cloudconfig-clusterapi-gusriandi.yaml
 ---
@@ -107,7 +107,7 @@ cat demome-capi.yaml
 kubectl apply -f demome-capi.yaml
 ```
 
-Verification:
+`Verification:`
 ```
 kubectl get cl -A
 NAMESPACE    NAME      CLUSTERCLASS   PHASE         AGE     VERSION
@@ -137,6 +137,15 @@ kubectl get ma -A
 NAMESPACE    NAME                          CLUSTER   NODENAME                      PROVIDERID                                          PHASE     AGE     VERSION
 kamaji-tcp   demome-workers-k4ww7-72vw7    demome    demome-workers-k4ww7-72vw7    openstack:///92d89223-681a-42ef-90c1-864de33808bc   Running   5h30m   v1.29.7
 kamaji-tcp   demome-workers-k4ww7-xrq8x    demome    demome-workers-k4ww7-xrq8x    openstack:///8237f379-afbd-45be-8e5d-ee1a885a1077   Running   6h42m   v1.29.7
+
+clusterctl describe cluster demome -n kamaji-tcp
+NAME                                                                READY  SEVERITY  REASON  SINCE  MESSAGE                                                    
+Cluster/demome                                                      True                     8h                                                                 
+├─ClusterInfrastructure - OpenStackCluster/openstackcluster-demome                                                                                              
+├─ControlPlane - KamajiControlPlane/tcp-demome                                                                                                                  
+└─Workers                                                                                                                                                       
+  └─MachineDeployment/demome-workers                                True                     6h46m                                                              
+    └─2 Machines...                                                 True                     7h59m  See demome-workers-k4ww7-72vw7, demome-workers-k4ww7-xrq8x 
 ```
 
 ## Cluster Operation
@@ -167,7 +176,7 @@ dm apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manif
 #### OPTION 2 : Install OCCM
 - If you install OCCM, taint node.cloudprovider.kubernetes.io/uninitialized:NoSchedule- will automaticaly remove when OCCM install.
 - Create openstack application credential, reference https://docs.openstack.org/keystone/latest/user/application_credentials.html
-- Reference : https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
+- `Reference` : https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
 
 ```
 openstack application credential create occmcapi --unrestricted
@@ -235,11 +244,11 @@ curl publicip:31776
 ### How to Upgrade Cluster ?
 - When you create cluster, in .yaml file is create kind: OpenStackMachineTemplate that define flavor, image and sshKeyName
 - You can't edit the yaml file and apply it, since OpenStackMachineTemplate are immutable, the recommended approach is to :
-- Reference https://release-1-7.cluster-api.sigs.k8s.io/tasks/upgrading-clusters#how-to-upgrade-the-underlying-machine-image
+- `Reference` https://release-1-7.cluster-api.sigs.k8s.io/tasks/upgrading-clusters#how-to-upgrade-the-underlying-machine-image
 - Create new OpenStackMachineTemplate, Modify the values that need changing, such as instance type or image ID.
 
-cat template/osmt-kubernetes-1.29.7.yaml
 ```
+cat template/osmt-kubernetes-1.29.7.yaml
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackMachineTemplate
 metadata:
@@ -292,7 +301,7 @@ kubectl apply -f demome-capi.yaml
 ```
 
 ### How to scale up and scale down workers ?
-Answer: Edit .yaml file in section :
+`ANSWER :` Edit .yaml file in section :
 ```
 vim demome-capi.yaml
 ---
@@ -306,27 +315,27 @@ kubectl apply -f demome-capi.yaml
 ```
 
 ### Its posible to donwgrade TCP and workers ?
-ANSWER: 
+`ANSWER :`
 - Downgrading workers version is posible as if supported version by TCP and CAPI.
 - But, downgrading TCP its self is not possible as Kamaji TCP is not allow to donwgrade.
 - #cannot create or update TenantControlPlane: admission webhook "vtenantcontrolplane.kb.io" denied the request: unable to downgrade a TenantControlPlane from 1.30.2 to 1.29.7
 
 ### Can you change workers to different Availability Zone ?
-ANSWER: YES
+`ANSWER :` YES
 - on kind: OpenStackCluster, change the controlPlaneAvailabilityZones, network, subnets to different AZ,
 - on kind: MachineDeployment, change failureDomain: AZ_Public01_JBBK to another AZ, 
 - if you move from AZ that required flavor like GP.4C8G-intel or GP.4C8G-amd: you must create new OpenStackMachineTemplate with the new flavor
 
 ### Can you Upgrade/Downgrade the workers Flavor ?
-ANSWER: Create new OpenStackMachineTemplate with your flavor: #Flavor desired.
+`ANSWER :` Create new OpenStackMachineTemplate with your flavor: #Flavor desired.
 
 ### Is there anything I should pay attention to when edit OpenStackMachineTemplate ? 
-ANSWER: when you edit OpenStackMachineTemplate to change flavor, image, keypair. Cluster API will create new instance, so it will change IP Address of new nodes.
+`ANSWER :` When you edit OpenStackMachineTemplate to change flavor, image, keypair. Cluster API will create new instance, so it will change IP Address of new nodes.
 
 
 
 ## Machine Health Check
-Reference https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/healthchecking
+`Reference` https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/healthchecking
 
 ### What is a MachineHealthCheck?
 - A MachineHealthCheck is a resource within the Cluster API which allows users to define conditions under which Machines within a Cluster should be considered unhealthy. 
@@ -337,7 +346,7 @@ If any of these conditions are met for the duration of the timeout, the Machine 
 
 
 ### Creating a MachineHealthCheck
-Note : 
+`NOTE` : 
 - Just add this MachineHealthCheck to .yaml file. 
 - You can add this add first time deploy the workload cluster, or after workload cluster is create by adding this to .yaml file and apply it.
 
@@ -381,7 +390,7 @@ spec:
 
 ## Cluster Autoscaler on Cluster API
 
-Reference https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/autoscaling
+`Reference` https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/autoscaling
 
 ### Using the Cluster Autoscaler
 This section applies only to worker Machines. Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster based on the utilization of Pods and Nodes in your cluster. For more general information about the Cluster Autoscaler, please see the project documentation.
@@ -390,7 +399,7 @@ The following instructions are a reproduction of the Cluster API provider specif
 Cluster Autoscaler on Cluster API
 The cluster autoscaler on Cluster API uses the cluster-api project to manage the provisioning and de-provisioning of nodes within a Kubernetes cluster.
 
-Note :
+`NOTE` :
 - You can create autoscaller after workload cluster is Ready, because autoscaller must have kubeconfig of workload cluster.
 - One workload cluster required 1 autoscaller.
 - You can use autoscaler for specific workload cluster only.
@@ -398,6 +407,7 @@ Note :
 
 
 ### Create Cluster Autoscaler on Cluster API
+`Reference` https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/clusterapi/examples/deployment.yaml
 ```
 cat demome-autoscaler.yaml
 kubectl apply -f demome-autoscaler.yaml
