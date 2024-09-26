@@ -1,24 +1,16 @@
 # Cluster API Control Plane Provider Kamaji
 Kamaji is an Open-Source project offering hosted Kubernetes control planes, the Control Plane is running in a management cluster as regular pods.
 
-`In this guide i use Infrastructure Provider OpenStack and ControlPlane Provider Kamaji`
-
-`Reference` https://github.com/clastix/cluster-api-control-plane-provider-kamaji
+In this guide i use [Cluster API Infrastructure Provider OpenStack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack) and [ControlPlane Provider Kamaji](https://github.com/clastix/cluster-api-control-plane-provider-kamaji)
 
 
-`Prequirement :`
-- Make sure Kamaji cluster already create first.
-  `Documentation` : https://kamaji.clastix.io/getting-started/
-- Install clusterctl on Kamaji Cluster
-  `Documentation` : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
-- Install Cluster API on Kamaji Cluster
-  `Documentation` : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start
-- Install Cluster API controlplane Kamaji on Kamaji Cluster
-  `Documentation` : https://github.com/clastix/cluster-api-control-plane-provider-kamaji
-  `Documentation` : https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
+`PREQUIREMENT :`
+- Make sure [Kamaji](https://kamaji.clastix.io/getting-started/) cluster already create first.
+- Install [clusterctl](https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl) on Kamaji Cluster
+- Install [Cluster API](https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start) on Kamaji Cluster
+- Install [Cluster API controlplane Kamaji](https://github.com/clastix/cluster-api-control-plane-provider-kamaji) on Kamaji Cluster
 
-## Install Cluster API on Kamaji Cluster
-`Reference` https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
+## Install [Cluster API](https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start) on Kamaji Cluster
 ```
 # Export Kubeconfig:
 export KUBECONFIG=/home/ubuntu/.kube/config
@@ -47,8 +39,7 @@ clusterctl init --infrastructure openstack
 clusterctl init --core cluster-api:v1.7.5 --bootstrap kubeadm:v1.7.5 --control-plane kubeadm:v1.7.5 --infrastructure openstack:v0.10.2
 ```
 
-## Install Cluster API controlplane Kamaji on Kamaji Cluster
-`Reference` https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
+## Install [Cluster API controlplane Kamaji](https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases) on Kamaji Cluster
 ```
 cat ~/.cluster-api/clusterctl.yaml
 providers:
@@ -84,8 +75,7 @@ clouds:
     identity_api_version: 3
 ```
 
-### Create secret in kamaji that store cloud.yaml file :
-`Reference` is here https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#required-configuration-for-common-providers
+### Create [Cloudconfig Secret](https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#required-configuration-for-common-providers) in kamaji that store cloud.yaml file :
 ```
 cat cloudconfig-clusterapi-gusriandi.yaml
 ---
@@ -175,10 +165,10 @@ for i in $(dm get node --no-headers | awk '{print $1}'); do dm taint nodes $i no
 dm apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml
 ```
 
-#### OPTION 2 : Install OCCM
-- If you install OCCM, taint node.cloudprovider.kubernetes.io/uninitialized:NoSchedule- will automaticaly remove when OCCM install.
-- Create openstack application credential, reference https://docs.openstack.org/keystone/latest/user/application_credentials.html
-- `Reference` : https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager
+#### OPTION 2 : Install [OpenStack Cloud Controller Manager](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-cloud-controller-manager/using-openstack-cloud-controller-manager.md#config-openstack-cloud-controller-manager)
+If you install OCCM, taint node.cloudprovider.kubernetes.io/uninitialized:NoSchedule- will automaticaly remove when OCCM install.
+
+Create [OpenStack Application Credential](https://docs.openstack.org/keystone/latest/user/application_credentials.html) to Use with OCCM 
 
 ```
 openstack application credential create occmcapi --unrestricted
@@ -242,11 +232,10 @@ dm get svc -o wide --selector app=nginx
 curl publicip:31776
 ```
 
-## UPGRADE, SCALEUP and SCALEDOWN CLUSTER
-### How to Upgrade Cluster ?
+## Upgrade, Scale-up and Scale-down Workload CLUSTER
+### How to [Upgrade Workload Cluster](https://release-1-7.cluster-api.sigs.k8s.io/tasks/upgrading-clusters#how-to-upgrade-the-underlying-machine-image) ?
 - When you create cluster, in .yaml file is create kind: OpenStackMachineTemplate that define flavor, image and sshKeyName
 - You can't edit the yaml file and apply it, since OpenStackMachineTemplate are immutable, the recommended approach is to :
-- `Reference` https://release-1-7.cluster-api.sigs.k8s.io/tasks/upgrading-clusters#how-to-upgrade-the-underlying-machine-image
 - Create new OpenStackMachineTemplate, Modify the values that need changing, such as instance type or image ID.
 
 ```
@@ -336,8 +325,7 @@ kubectl apply -f demome-capi.yaml
 
 
 
-## Machine Health Check
-`Reference` https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/healthchecking
+## Cluster API [Machine Health Check](https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/healthchecking)
 
 ### What is a MachineHealthCheck?
 - A MachineHealthCheck is a resource within the Cluster API which allows users to define conditions under which Machines within a Cluster should be considered unhealthy. 
@@ -390,10 +378,7 @@ spec:
 - If new instance will state NodeReady for 10m [you not install CNI on it], it will create new instance to, as MachineHealthCheck detect the node as NodeReady
 
 
-## Cluster Autoscaler on Cluster API
-
-`Reference` https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/autoscaling
-
+## [Cluster Autoscaler](https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/autoscaling) on Cluster API
 ### Using the Cluster Autoscaler
 This section applies only to worker Machines. Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster based on the utilization of Pods and Nodes in your cluster. For more general information about the Cluster Autoscaler, please see the project documentation.
 
@@ -408,8 +393,7 @@ The cluster autoscaler on Cluster API uses the cluster-api project to manage the
 - This autoscaler can do scale-up and scale-down size of node.
 
 
-### Create Cluster Autoscaler on Cluster API
-`Reference` https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/clusterapi/examples/deployment.yaml
+### Create [Cluster Autoscaler on Cluster API](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/clusterapi/examples/deployment.yaml)
 ```
 cat demome-autoscaler.yaml
 kubectl apply -f demome-autoscaler.yaml
