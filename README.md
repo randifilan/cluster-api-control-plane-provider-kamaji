@@ -381,7 +381,7 @@ spec:
 
 ## Cluster Autoscaler on Cluster API
 
-RReferenceef https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/autoscaling
+Reference https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/autoscaling
 
 ### Using the Cluster Autoscaler
 This section applies only to worker Machines. Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster based on the utilization of Pods and Nodes in your cluster. For more general information about the Cluster Autoscaler, please see the project documentation.
