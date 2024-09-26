@@ -1,8 +1,7 @@
 # Cluster API Control Plane Provider Kamaji
-Kamaji is an Open-Source project offering hosted Kubernetes control planes, the Control Plane is running in a management cluster as regular pods.
-
 In this guide i use [Cluster API Infrastructure Provider OpenStack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack) and [ControlPlane Provider Kamaji](https://github.com/clastix/cluster-api-control-plane-provider-kamaji)
 
+Kamaji is an Open-Source project offering hosted Kubernetes control planes, the Control Plane is running in a management cluster as regular pods.
 
 `PREQUIREMENT :`
 - Make sure [Kamaji](https://kamaji.clastix.io/getting-started/) cluster already create first.
