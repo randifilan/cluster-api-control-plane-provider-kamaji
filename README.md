@@ -1,24 +1,21 @@
 # Cluster API Control Plane Provider Kamaji
-Kamaji is an Open-Source project offering hosted Kubernetes control planes.
-the Control Plane is running in a management cluster as regular pods.
+Kamaji is an Open-Source project offering hosted Kubernetes control planes, the Control Plane is running in a management cluster as regular pods.
 
 
-```
 Prequirement :
-1.  Make sure Kamaji cluster already create first.
-    Documentation : https://kamaji.clastix.io/getting-started/
-2.  Install clusterctl on Kamaji Cluster
-    Documentation : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
-3.  Install Cluster API on Kamaji Cluster
-    Documentation : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start
-4.  Install Cluster API controlplane Kamaji on Kamaji Cluster
-    Documentation : https://github.com/clastix/cluster-api-control-plane-provider-kamaji
-    Documentation : https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
-```
+- Make sure Kamaji cluster already create first. 
+  Documentation : https://kamaji.clastix.io/getting-started/
+- Install clusterctl on Kamaji Cluster
+  Documentation : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
+- Install Cluster API on Kamaji Cluster
+  Documentation : https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start
+- Install Cluster API controlplane Kamaji on Kamaji Cluster
+  Documentation : https://github.com/clastix/cluster-api-control-plane-provider-kamaji
+  Documentation : https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
 
 ## Install Cluster API on Kamaji Cluster
+Reference https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
 ```
-# Ref https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl
 - Export Kubeconfig:
 export KUBECONFIG=/home/ubuntu/.kube/config
 
@@ -28,14 +25,14 @@ sudo install -o root -g root -m 0755 clusterctl /usr/local/bin/clusterctl
 clusterctl version
 
 - Initialize the Management cluster:
-# Ref https://main.cluster-api.sigs.k8s.io/user/quick-start#initialize-the-management-cluster
+# Reference https://main.cluster-api.sigs.k8s.io/user/quick-start#initialize-the-management-cluster
 export CLUSTER_TOPOLOGY=true
 
 # This will install the latest cluster-api provider version
 clusterctl init --infrastructure openstack
 
 # Cluster API controlplane kamaji have compability matric that you can show the link below
-# Ref https://github.com/clastix/cluster-api-control-plane-provider-kamaji?tab=readme-ov-file#-compatibility-matrix
+# Reference https://github.com/clastix/cluster-api-control-plane-provider-kamaji?tab=readme-ov-file#-compatibility-matrix
 # CP provider   Cluster API               Kamaji      TCP API version
 # v0.10.x       v1.5.x, v1.6.x, v1.7.x    ~v1.0.x     v1alpha1
 # v0.10.x       v1.5.x, v1.6.x, v1.7.x    ~v1.0.x     v1alpha1
@@ -49,8 +46,8 @@ clusterctl init --core cluster-api:v1.7.5 --bootstrap kubeadm:v1.7.5 --control-p
 ```
 
 ## Install Cluster API controlplane Kamaji on Kamaji Cluster
+Reference https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
 ```
-# Ref https://github.com/clastix/cluster-api-control-plane-provider-kamaji/releases
 cat ~/.cluster-api/clusterctl.yaml
 providers:
 - name: "kamaji"
@@ -69,8 +66,8 @@ clusterctl init --control-plane kamaji
 Login to horizon, klik Project > API Access > Downlaod OpenStack RF File > OpenStack clouds.yaml file
 Copy file to ~/clouds.yaml, the file look like this
 
-cat clouds.yaml
 ```
+cat clouds.yaml
 clouds:
   capi:
     auth:
@@ -86,8 +83,8 @@ clouds:
 ```
 
 ### Create secret in kamaji that store cloud.yaml file :
+Reference is here https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#required-configuration-for-common-providers
 ```
-# Reference is here https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#required-configuration-for-common-providers
 cat cloudconfig-clusterapi-gusriandi.yaml
 ---
 apiVersion: v1
@@ -147,7 +144,6 @@ kamaji-tcp   demome-workers-k4ww7-xrq8x    demome    demome-workers-k4ww7-xrq8x 
 ```
 clusterctl get kubeconfig demome -n kamaji-tcp > /home/ubuntu/cluster-prod/demome.kubeconfig
 
-- Operation:
 alias dm="kubectl --kubeconfig=/home/ubuntu/cluster-prod/demome.kubeconfig"
 dm get nodes -o wide
 dm get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints
@@ -157,7 +153,7 @@ demome-workers-9xpnb-m4j5q   [map[effect:NoSchedule key:node.cloudprovider.kuber
 demome-workers-9xpnb-vs7qr   [map[effect:NoSchedule key:node.cloudprovider.kubernetes.io/uninitialized value:true] map[effect:NoSchedule key:node.kubernetes.io/not-ready]]
 ```
 
-### Install OCCM or Not
+### Install OpenStack Cloud Controller Manager
 #### OPTION 1 : Not install OCCM
 - If you dont want to install OCCM, you need to remove taint node.cloudprovider.kubernetes.io/uninitialized:NoSchedule- from all workers
 - this action always need when new node are join to cluster, for example Upgrade.
@@ -239,7 +235,7 @@ curl publicip:31776
 ### How to Upgrade Cluster ?
 - When you create cluster, in .yaml file is create kind: OpenStackMachineTemplate that define flavor, image and sshKeyName
 - You can't edit the yaml file and apply it, since OpenStackMachineTemplate are immutable, the recommended approach is to :
-- https://release-1-7.cluster-api.sigs.k8s.io/tasks/upgrading-clusters#how-to-upgrade-the-underlying-machine-image
+- Reference https://release-1-7.cluster-api.sigs.k8s.io/tasks/upgrading-clusters#how-to-upgrade-the-underlying-machine-image
 - Create new OpenStackMachineTemplate, Modify the values that need changing, such as instance type or image ID.
 
 cat template/osmt-kubernetes-1.29.7.yaml
@@ -328,11 +324,11 @@ ANSWER: Create new OpenStackMachineTemplate with your flavor: #Flavor desired.
 ANSWER: when you edit OpenStackMachineTemplate to change flavor, image, keypair. Cluster API will create new instance, so it will change IP Address of new nodes.
 
 
+
 ## Machine Health Check
-Ref https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/healthchecking
+Reference https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/healthchecking
 
 ### What is a MachineHealthCheck?
-ANSWER :
 - A MachineHealthCheck is a resource within the Cluster API which allows users to define conditions under which Machines within a Cluster should be considered unhealthy. 
 A MachineHealthCheck is defined on a management cluster and scoped to a particular workload cluster.
 - When defining a MachineHealthCheck, users specify a timeout for each of the conditions that they define to check on the Machine’s Node. 
@@ -385,7 +381,7 @@ spec:
 
 ## Cluster Autoscaler on Cluster API
 
-Ref https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/autoscaling
+RReferenceef https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/autoscaling
 
 ### Using the Cluster Autoscaler
 This section applies only to worker Machines. Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster based on the utilization of Pods and Nodes in your cluster. For more general information about the Cluster Autoscaler, please see the project documentation.
@@ -403,212 +399,10 @@ Note :
 
 ### Create Cluster Autoscaler on Cluster API
 ```
-# cat demome-autoscaler.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: clusterautoscaler-demome
-  namespace: kamaji-tcp
-  labels:
-    app: clusterautoscaler-demome
-spec:
-  selector:
-    matchLabels:
-      app: clusterautoscaler-demome
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: clusterautoscaler-demome
-    spec:
-      containers:
-      - image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.29.0
-        name: clusterautoscaler-demome
-        command:
-        - /cluster-autoscaler
-        args:
-        # Define CAPI Cloud Provider
-        - --cloud-provider=clusterapi
-        - --node-group-auto-discovery=clusterapi:namespace=kamaji-tcp,clusterName=demome
-        # Kubeconfig of Workload Cluster inside the pod of autoscaler
-        - --kubeconfig=/mnt/kubeconfig/demome.kubeconfig
-        - --clusterapi-cloud-config-authoritative
-        - -v=1
-        # Mount Kubeconfig of workload cluster
-        volumeMounts:
-        - mountPath: /mnt/kubeconfig
-          name: kubeconfig
-          readOnly: true
-      serviceAccountName: clusterautoscaler-demome
-      terminationGracePeriodSeconds: 10
-      tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/control-plane
-      volumes:
-        - name: kubeconfig
-          secret:
-            secretName: demome-kubeconfig
-            items:
-              - key: value
-                path: demome.kubeconfig
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: clusterautoscaler-demome-workload
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: clusterautoscaler-demome-workload
-subjects:
-- kind: ServiceAccount
-  name: clusterautoscaler-demome
-  namespace: kamaji-tcp
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: clusterautoscaler-demome-management
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: clusterautoscaler-demome-management
-subjects:
-- kind: ServiceAccount
-  name: clusterautoscaler-demome
-  namespace: kamaji-tcp
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: clusterautoscaler-demome
-  namespace: kamaji-tcp
----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: clusterautoscaler-demome-workload
-rules:
-  - apiGroups:
-    - ""
-    resources:
-    - namespaces
-    - persistentvolumeclaims
-    - persistentvolumes
-    - pods
-    - replicationcontrollers
-    - services
-    verbs:
-    - get
-    - list
-    - watch
-  - apiGroups:
-    - ""
-    resources:
-    - nodes
-    verbs:
-    - get
-    - list
-    - update
-    - watch
-  - apiGroups:
-    - ""
-    resources:
-    - pods/eviction
-    verbs:
-    - create
-  - apiGroups:
-    - policy
-    resources:
-    - poddisruptionbudgets
-    verbs:
-    - list
-    - watch
-  - apiGroups:
-    - storage.k8s.io
-    resources:
-    - csinodes
-    - storageclasses
-    - csidrivers
-    - csistoragecapacities
-    verbs:
-    - get
-    - list
-    - watch
-  - apiGroups:
-    - batch
-    resources:
-    - jobs
-    verbs:
-    - list
-    - watch
-  - apiGroups:
-    - apps
-    resources:
-    - daemonsets
-    - replicasets
-    - statefulsets
-    verbs:
-    - list
-    - watch
-  - apiGroups:
-    - ""
-    resources:
-    - events
-    verbs:
-    - create
-    - patch
-  - apiGroups:
-    - ""
-    resources:
-    - configmaps
-    verbs:
-    - create
-    - delete
-    - get
-    - update
-  - apiGroups:
-    - coordination.k8s.io
-    resources:
-    - leases
-    verbs:
-    - create
-    - get
-    - update
----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: clusterautoscaler-demome-management
-rules:
-  - apiGroups:
-    - cluster.x-k8s.io
-    resources:
-    - machinedeployments
-    - machinedeployments/scale
-    - machines
-    - machinesets
-    - machinepools
-    verbs:
-    - get
-    - list
-    - update
-    - watch
-  - apiGroups:
-    - infrastructure.cluster.x-k8s.io
-    resources:
-    - openstackmachinetemplates
-    verbs:
-    - get
-    - list
-    - update
-    - watch
-```
-
-Apply Autoscaler
-```
+cat demome-autoscaler.yaml
 kubectl apply -f demome-autoscaler.yaml
 ```
+
 
 Test Cluster Autoscaler on Cluster API
 Note : Run this using kubeconfig of workload cluster

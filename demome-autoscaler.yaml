@@ -1,0 +1,199 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clusterautoscaler-demome
+  namespace: kamaji-tcp
+  labels:
+    app: clusterautoscaler-demome
+spec:
+  selector:
+    matchLabels:
+      app: clusterautoscaler-demome
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: clusterautoscaler-demome
+    spec:
+      containers:
+      - image: registry.k8s.io/autoscaling/cluster-autoscaler:v1.29.0
+        name: clusterautoscaler-demome
+        command:
+        - /cluster-autoscaler
+        args:
+        # Define CAPI Cloud Provider
+        - --cloud-provider=clusterapi
+        - --node-group-auto-discovery=clusterapi:namespace=kamaji-tcp,clusterName=demome
+        # Kubeconfig of Workload Cluster inside the pod of autoscaler
+        - --kubeconfig=/mnt/kubeconfig/demome.kubeconfig
+        - --clusterapi-cloud-config-authoritative
+        - -v=1
+        # Mount Kubeconfig of workload cluster
+        volumeMounts:
+        - mountPath: /mnt/kubeconfig
+          name: kubeconfig
+          readOnly: true
+      serviceAccountName: clusterautoscaler-demome
+      terminationGracePeriodSeconds: 10
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+      volumes:
+        - name: kubeconfig
+          secret:
+            secretName: demome-kubeconfig
+            items:
+              - key: value
+                path: demome.kubeconfig
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: clusterautoscaler-demome-workload
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: clusterautoscaler-demome-workload
+subjects:
+- kind: ServiceAccount
+  name: clusterautoscaler-demome
+  namespace: kamaji-tcp
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: clusterautoscaler-demome-management
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: clusterautoscaler-demome-management
+subjects:
+- kind: ServiceAccount
+  name: clusterautoscaler-demome
+  namespace: kamaji-tcp
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: clusterautoscaler-demome
+  namespace: kamaji-tcp
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: clusterautoscaler-demome-workload
+rules:
+  - apiGroups:
+    - ""
+    resources:
+    - namespaces
+    - persistentvolumeclaims
+    - persistentvolumes
+    - pods
+    - replicationcontrollers
+    - services
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - ""
+    resources:
+    - nodes
+    verbs:
+    - get
+    - list
+    - update
+    - watch
+  - apiGroups:
+    - ""
+    resources:
+    - pods/eviction
+    verbs:
+    - create
+  - apiGroups:
+    - policy
+    resources:
+    - poddisruptionbudgets
+    verbs:
+    - list
+    - watch
+  - apiGroups:
+    - storage.k8s.io
+    resources:
+    - csinodes
+    - storageclasses
+    - csidrivers
+    - csistoragecapacities
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - batch
+    resources:
+    - jobs
+    verbs:
+    - list
+    - watch
+  - apiGroups:
+    - apps
+    resources:
+    - daemonsets
+    - replicasets
+    - statefulsets
+    verbs:
+    - list
+    - watch
+  - apiGroups:
+    - ""
+    resources:
+    - events
+    verbs:
+    - create
+    - patch
+  - apiGroups:
+    - ""
+    resources:
+    - configmaps
+    verbs:
+    - create
+    - delete
+    - get
+    - update
+  - apiGroups:
+    - coordination.k8s.io
+    resources:
+    - leases
+    verbs:
+    - create
+    - get
+    - update
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: clusterautoscaler-demome-management
+rules:
+  - apiGroups:
+    - cluster.x-k8s.io
+    resources:
+    - machinedeployments
+    - machinedeployments/scale
+    - machines
+    - machinesets
+    - machinepools
+    verbs:
+    - get
+    - list
+    - update
+    - watch
+  - apiGroups:
+    - infrastructure.cluster.x-k8s.io
+    resources:
+    - openstackmachinetemplates
+    verbs:
+    - get
+    - list
+    - update
+    - watch
