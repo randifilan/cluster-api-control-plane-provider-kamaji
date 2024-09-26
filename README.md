@@ -4,7 +4,7 @@ In this guide i use [Cluster API Infrastructure Provider OpenStack](https://gith
 Kamaji is an Open-Source project offering hosted Kubernetes control planes, the Control Plane is running in a management cluster as regular pods.
 
 `PREQUIREMENT :`
-- Make sure [Kamaji](https://kamaji.clastix.io/getting-started/) cluster already create first.
+- Make sure [Kamaji](https://kamaji.clastix.io/getting-started/) Cluster Already create first.
 - Install [clusterctl](https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#install-clusterctl) on Kamaji Cluster
 - Install [Cluster API](https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start) on Kamaji Cluster
 - Install [Cluster API controlplane Kamaji](https://github.com/clastix/cluster-api-control-plane-provider-kamaji) on Kamaji Cluster
@@ -53,9 +53,8 @@ clusterctl init --control-plane kamaji
 ```
 
 ## Create Workload Cluster
-### Prepare openstack clouds.yaml file
-
-Login to horizon, klik Project > API Access > Downlaod OpenStack RF File > OpenStack clouds.yaml file
+### Prepare OpenStack clouds.yaml file
+Login to horizon, klik Project > API Access > Downlaod OpenStack RF File > OpenStack clouds.yaml file. <br/>
 Copy file to ~/clouds.yaml, the file look like this
 
 ```
@@ -74,7 +73,7 @@ clouds:
     identity_api_version: 3
 ```
 
-### Create [Cloudconfig Secret](https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#required-configuration-for-common-providers) in kamaji that store cloud.yaml file :
+### Create [Cloudconfig Secret](https://release-1-7.cluster-api.sigs.k8s.io/user/quick-start#required-configuration-for-common-providers) in kamaji that store cloud.yaml file
 ```
 cat cloudconfig-clusterapi-gusriandi.yaml
 ---
@@ -92,7 +91,7 @@ metadata:
 kubectl apply -f cloudconfig-clusterapi-gusriandi.yaml
 ```
 
-### Create workload cluster with .yaml file:
+### Create workload cluster with .yaml file
 ```
 cat demome-capi.yaml 
 kubectl apply -f demome-capi.yaml
@@ -140,7 +139,7 @@ Cluster/demome                                                      True        
 ```
 
 ## Cluster Operation
-### Get Kubeconfig:
+### Get Kubeconfig
 ```
 clusterctl get kubeconfig demome -n kamaji-tcp > /home/ubuntu/cluster-prod/demome.kubeconfig
 
@@ -155,9 +154,9 @@ demome-workers-9xpnb-vs7qr   [map[effect:NoSchedule key:node.cloudprovider.kuber
 
 ### Install OpenStack Cloud Controller Manager
 #### OPTION 1 : Not install OCCM
-- If you dont want to install OCCM, you need to remove taint node.cloudprovider.kubernetes.io/uninitialized:NoSchedule- from all workers
-- this action always need when new node are join to cluster, for example Upgrade.
-otherwise, when install CNI or create deployment, all pod stuck in schduling
+If you dont want to install OCCM, you need to remove taint node.cloudprovider.kubernetes.io/uninitialized:NoSchedule- from all workers. <br/>
+this action always need when new node are join to cluster, for example Upgrade.
+otherwise, when install CNI or create deployment, all pod stuck in schduling. <br/>
 
 ```
 for i in $(dm get node --no-headers | awk '{print $1}'); do dm taint nodes $i node.cloudprovider.kubernetes.io/uninitialized:NoSchedule-; done
@@ -233,9 +232,8 @@ curl publicip:31776
 
 ## Upgrade, Scale-up and Scale-down Workload CLUSTER
 ### How to [Upgrade Workload Cluster](https://release-1-7.cluster-api.sigs.k8s.io/tasks/upgrading-clusters#how-to-upgrade-the-underlying-machine-image) ?
-- When you create cluster, in .yaml file is create kind: OpenStackMachineTemplate that define flavor, image and sshKeyName
-- You can't edit the yaml file and apply it, since OpenStackMachineTemplate are immutable, the recommended approach is to :
-- Create new OpenStackMachineTemplate, Modify the values that need changing, such as instance type or image ID.
+When you create cluster, in .yaml file is create `kind: OpenStackMachineTemplate` that define flavor, image and sshKeyName. <br/>
+You can't edit the yaml file and apply it, since `OpenStackMachineTemplate` are immutable, the recommended approach is to Create new `OpenStackMachineTemplate`, Modify the values that need changing, such as instance type or image ID.
 
 ```
 cat template/osmt-kubernetes-1.29.7.yaml
@@ -254,7 +252,7 @@ spec:
       sshKeyName: rf-macos
 ```
 
-Create the new OpenStackMachineTemplate on the management cluster.
+Create the new `OpenStackMachineTemplate` on the management cluster.
 ```
 kubectl apply -f template/osmt-kubernetes-1.29.7.yaml
 # openstackmachinetemplate.infrastructure.cluster.x-k8s.io/osct-kubernetes-1.29.7 created
@@ -371,10 +369,10 @@ spec:
 ```
 
 ### How to test Machine health check ?
-- If you accidentally delete instance from OpenStack Horizon. For example, if workload cluster contain 3 instance and you delete 2 instance.
-- MachineHealthCheck will check the instace and found that instance is Missing, it will delpoy new instance and automatically joining to the cluster.
-- In example i define nodeStartupTimeout: 10m, if create instance not join the cluster that you define, CAPI will create new instance for you.
-- If new instance will state NodeReady for 10m [you not install CNI on it], it will create new instance to, as MachineHealthCheck detect the node as NodeReady
+- If you accidentally delete instance from OpenStack via Horizon/OpenStack Client. For example, if workload cluster contain 3 instance and you delete 2 instance.
+- MachineHealthCheck will check the instace and found that instance is Missing, it will redelpoy new instance and automatically join it to cluster.
+- In example define `nodeStartupTimeout: 10m`, if created instance not join the cluster, CAPI will recreate new instance for you.
+- If new instance will state `NodeReady` for 10m [you not install CNI on it], it will recreate new instance to, as `MachineHealthCheck` detect the node as `NotReady`
 
 
 ## [Cluster Autoscaler](https://release-1-7.cluster-api.sigs.k8s.io/tasks/automated-machine-management/autoscaling) on Cluster API
@@ -398,8 +396,7 @@ cat demome-autoscaler.yaml
 kubectl apply -f demome-autoscaler.yaml
 ```
 
-
-Test Cluster Autoscaler on Cluster API
+#### Test Cluster Autoscaler on Cluster API [Scale UP]
 Note : Run this using kubeconfig of workload cluster
 
 Deploy an example Kubernetes application. For example, the one used in the Kubernetes HorizontalPodAutoscaler Walkthrough.
@@ -411,11 +408,12 @@ Increase the amount of replicas of the application to trigger a scale-up event
 kubectl scale deployment php-apache --replicas 100
 ```
 
-It will create 100 replica pods, and many pod are stuck at pending, autoscaller will monitor the pending of pods, and autoscaller the size of Instance using MachineDeployment
+It will create 100 pods, as many pod are stuck at pending, autoscaller will monitor the pending of the pods, and autoscaller will resize of Instance using `MachineDeployment`
 
-Decreate the amount of replicas of the application to trigger a scale-down event
+#### Test Cluster Autoscaler on Cluster API [Scale Down]
+Decrease the amount of replicas of the deployment to trigger a scale-down event
 ```
 kubectl scale deployment php-apache --replicas 10
 ```
-As before with 100 replica pods with many nodes, when you resize replica to 10 pods, kube-scheduler will Terminating 90 pods,
-As of that, there will many node with unused resource, autoscaler will detect it and resize the number of node to fit the size of Running pods.
+As before with 100 replica pods with many nodes, when you resize replica to 10 pods, kube-scheduler will Terminating 90 pods. <br/>
+As of that, there will many node with unused resource, autoscaler will detect it and resize the number of node and Scale down the cluster.
