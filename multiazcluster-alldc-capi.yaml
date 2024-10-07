@@ -1,0 +1,347 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: cluster-alldc
+  namespace: kamaji-tcp
+  labels:
+    cloud: openstack
+    Cloud: openstack
+spec:
+  clusterNetwork:
+    serviceDomain: cluster.local
+    pods:
+      cidrBlocks:
+      - 10.244.0.0/16
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+    kind: KamajiControlPlane
+    name: ktcp-cluster-alldc
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: OpenStackCluster
+    name: osc-dc4-cluster-alldc
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+kind: KamajiControlPlane
+metadata:
+  name: ktcp-cluster-alldc
+  namespace: kamaji-tcp
+spec:
+  replicas: 3
+  version: 1.29.7
+  dataStoreName: kamaji-etcd
+  addons:
+    coreDNS: {}
+    kubeProxy: {}
+    konnectivity: {}
+  kubelet:
+    preferredAddressTypes:
+      - InternalIP
+      - ExternalIP
+      - Hostname
+  network:
+    serviceType: LoadBalancer
+    serviceAnnotations:
+      service.beta.kubernetes.io/openstack-internal-load-balancer: "false"
+      loadbalancer.openstack.org/floating-network-id: f9881508-7de0-488e-a4ff-c437f4c8687f
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackCluster
+metadata:
+  name: osc-dc4-cluster-alldc
+  namespace: kamaji-tcp
+spec:
+  apiServerLoadBalancer:
+    enabled: false
+  controlPlaneAvailabilityZones:
+    - AZ_Public01_JBBK
+  disableAPIServerFloatingIP: true
+  disableExternalNetwork: true
+  apiServerFixedIP: ""
+  network:
+    id: f9881508-7de0-488e-a4ff-c437f4c8687f
+  subnets:
+  - id: cc7d6dbb-9dec-4184-82f2-fdfe8749e231
+  identityRef:
+    cloudName: capi
+    name: cloudconfig-prj.clusterapi-user.gusriandi
+  managedSecurityGroups:
+    allowAllInClusterTraffic: false
+    allNodesSecurityGroupRules:
+    - remoteManagedGroups:
+      - worker
+      direction: ingress
+      etherType: IPv4
+      name: BGP
+      portRangeMin: 179
+      portRangeMax: 179
+      protocol: "tcp"
+      description: "Allow BGP among Workers"
+    - remoteManagedGroups:
+      - worker
+      direction: ingress
+      etherType: IPv4
+      name: IP-in-IP
+      protocol: "4"
+      description: "Allow IP-in-IP among Workers"
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KubeadmConfigTemplate
+metadata:
+  name: kubeadmconfigtemplate-cluster-alldc
+  namespace: kamaji-tcp
+spec:
+  template:
+    spec:
+      files: []
+      joinConfiguration:
+        nodeRegistration:
+          kubeletExtraArgs:
+            cloud-provider: external
+            provider-id: openstack:///'{{ instance_id }}'
+          name: '{{ local_hostname }}'
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: osmt-dc2-cluster-alldc-2c4g-intel
+  namespace: kamaji-tcp
+spec:
+  template:
+    spec:
+      ports:
+        - network:
+            id: 5fe9629f-6404-4b6b-bbb8-47b2bf983eae
+      flavor: GP.2C4G
+      image:
+        filter:
+          name: "DKubes Worker v1.29.7"
+      sshKeyName: rf-macos
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: osmt-dc2-cluster-alldc-8c16g-intel
+  namespace: kamaji-tcp
+spec:
+  template:
+    spec:
+      ports:
+        - network:
+            id: 5fe9629f-6404-4b6b-bbb8-47b2bf983eae
+      flavor: GP.8C16G
+      image:
+        filter:
+          name: "DKubes Worker v1.29.7"
+      sshKeyName: rf-macos
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: osmt-dc3-cluster-alldc-2c4g-intel
+  namespace: kamaji-tcp
+spec:
+  template:
+    spec:
+      ports:
+        - network:
+            id: 03cbe6da-6e7e-4184-af36-e64b9341de48
+      flavor: GP.2C4G
+      image:
+        filter:
+          name: "DKubes Worker v1.29.7"
+      sshKeyName: rf-macos
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: osmt-dc4-cluster-alldc-2c4g-intel
+  namespace: kamaji-tcp
+spec:
+  template:
+    spec:
+      ports:
+        - network:
+            id: f9881508-7de0-488e-a4ff-c437f4c8687f
+      flavor: GP.2C4G-intel
+      image:
+        filter:
+          name: "DKubes Worker v1.29.7"
+      sshKeyName: rf-macos
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: osmt-dc4-cluster-alldc-8c16g-amd
+  namespace: kamaji-tcp
+spec:
+  template:
+    spec:
+      ports:
+        - network:
+            id: f9881508-7de0-488e-a4ff-c437f4c8687f
+      flavor: GP.8C16G-amd
+      image:
+        filter:
+          name: "DKubes Worker v1.29.7"
+      sshKeyName: rf-macos
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  annotations:
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3"
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+  name: md-dc2-cluster-alldc-2c4g-intel
+  namespace: kamaji-tcp
+spec:
+  clusterName: cluster-alldc
+  replicas: 2
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: kubeadmconfigtemplate-cluster-alldc
+      clusterName: cluster-alldc
+      failureDomain: AZ_Public01_DC2
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackMachineTemplate
+        name: osmt-dc2-cluster-alldc-2c4g-intel
+      version: 1.29.7
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  annotations:
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3"
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+  name: md-dc2-cluster-alldc-8c16g-intel
+  namespace: kamaji-tcp
+spec:
+  clusterName: cluster-alldc
+  replicas: 2
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: kubeadmconfigtemplate-cluster-alldc
+      clusterName: cluster-alldc
+      failureDomain: AZ_Public01_DC2
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackMachineTemplate
+        name: osmt-dc2-cluster-alldc-8c16g-intel
+      version: 1.29.7
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  annotations:
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3"
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+  name: md-dc3-cluster-alldc-2c4g-intel
+  namespace: kamaji-tcp
+spec:
+  clusterName: cluster-alldc
+  replicas: 2
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: kubeadmconfigtemplate-cluster-alldc
+      clusterName: cluster-alldc
+      failureDomain: AZ_Public01_DC3
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackMachineTemplate
+        name: osmt-dc3-cluster-alldc-2c4g-intel
+      version: 1.29.7
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  annotations:
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3"
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+  name: md-dc4-cluster-alldc-2c4g-intel
+  namespace: kamaji-tcp
+spec:
+  clusterName: cluster-alldc
+  replicas: 2
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: kubeadmconfigtemplate-cluster-alldc
+      clusterName: cluster-alldc
+      failureDomain: AZ_Public01_JBBK
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackMachineTemplate
+        name: osmt-dc4-cluster-alldc-2c4g-intel
+      version: 1.29.7
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  annotations:
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "3"
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+  name: md-dc4-cluster-alldc-8c16g-amd
+  namespace: kamaji-tcp
+spec:
+  clusterName: cluster-alldc
+  replicas: 2
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: kubeadmconfigtemplate-cluster-alldc
+      clusterName: cluster-alldc
+      failureDomain: AZ_Public01_JBBK
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: OpenStackMachineTemplate
+        name: osmt-dc4-cluster-alldc-8c16g-amd
+      version: 1.29.7
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineHealthCheck
+metadata:
+  name: mhcs-cluster-alldc-node-unhealthy-5m
+  namespace: kamaji-tcp
+spec:
+  clusterName: cluster-alldc
+  # Optional - maxUnhealthy prevents further remediation if the cluster is already partially unhealthy
+  maxUnhealthy: 100%
+  # Optional - nodeStartupTimeout determines how long a MachineHealthCheck should wait for a Node to join the cluster, before considering a Machine unhealthy.
+  # Defaults to 10 minutes if not specified. Set to 0 to disable the node startup timeout.
+  # Disabling this timeout will prevent a Machine from being considered unhealthy when the Node it created has not yet registered with the cluster. 
+  # This can be useful when Nodes take a long time to start up or when you only want condition based checks for Machine health.
+  nodeStartupTimeout: 10m
+  # selector is used to determine which Machines should be health checked
+  selector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: cluster-alldc
+  # Conditions to check on Nodes for matched Machines, if any condition is matched for the duration of its timeout, the Machine is considered unhealthy
+  unhealthyConditions:
+  - type: Ready
+    status: Unknown
+    timeout: 300s
+  - type: Ready
+    status: "False"
+    timeout: 300s
+  - type: Pending
+    status: "True"
+    timeout: 60s

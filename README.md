@@ -417,3 +417,70 @@ kubectl scale deployment php-apache --replicas 10
 ```
 As before with 100 replica pods with many nodes, when you resize replica to 10 pods, kube-scheduler will Terminating 90 pods. <br/>
 As of that, there will many node with unused resource, autoscaler will detect it and resize the number of node and Scale down the cluster.
+
+
+## Cluster API with Multi Availability Zone Workers Node
+```
+cat multiazcluster-alldc-capi.yaml
+```
+
+```
+kubectl apply -f multiazcluster-alldc-capi.yaml
+cluster.cluster.x-k8s.io/cluster-alldc created
+kamajicontrolplane.controlplane.cluster.x-k8s.io/ktcp-cluster-alldc created
+openstackcluster.infrastructure.cluster.x-k8s.io/osc-dc4-cluster-alldc created
+kubeadmconfigtemplate.bootstrap.cluster.x-k8s.io/kubeadmconfigtemplate-cluster-alldc created
+openstackmachinetemplate.infrastructure.cluster.x-k8s.io/osmt-dc2-cluster-alldc-2c4g-intel created
+openstackmachinetemplate.infrastructure.cluster.x-k8s.io/osmt-dc2-cluster-alldc-8c16g-intel created
+openstackmachinetemplate.infrastructure.cluster.x-k8s.io/osmt-dc3-cluster-alldc-2c4g-intel created
+openstackmachinetemplate.infrastructure.cluster.x-k8s.io/osmt-dc4-cluster-alldc-2c4g-intel created
+openstackmachinetemplate.infrastructure.cluster.x-k8s.io/osmt-dc4-cluster-alldc-8c16g-amd created
+machinedeployment.cluster.x-k8s.io/md-dc2-cluster-alldc-2c4g-intel created
+machinedeployment.cluster.x-k8s.io/md-dc2-cluster-alldc-8c16g-intel created
+machinedeployment.cluster.x-k8s.io/md-dc3-cluster-alldc-2c4g-intel created
+machinedeployment.cluster.x-k8s.io/md-dc4-cluster-alldc-2c4g-intel created
+machinedeployment.cluster.x-k8s.io/md-dc4-cluster-alldc-8c16g-amd created
+machinehealthcheck.cluster.x-k8s.io/mhcs-cluster-alldc-node-unhealthy-5m created
+```
+
+### Verification
+```
+kubectl get machine
+
+NAME                                           CLUSTER         NODENAME                                       PROVIDERID                                          PHASE     AGE     VERSION
+md-02-newcl2-dg25j-hrl9n                       newcl2          md-02-newcl2-dg25j-hrl9n                       openstack:///fb81232f-4f09-4fb7-bb9a-edd61e3bda8a   Running   3d4h    v1.29.7
+md-02-newcl2-dg25j-wtbhh                       newcl2          md-02-newcl2-dg25j-wtbhh                       openstack:///c6dd6ec8-7a90-42f2-bdd7-cf7e29c3e377   Running   3d4h    v1.29.7
+md-03-newcl2-l5x69-h78gm                       newcl2                                                                                                             Pending   7m9s    v1.29.7s
+md-03-newcl2-l5x69-rtw8s                       newcl2                                                                                                             Pending   6m53s   v1.29.7s
+md-04-newcl2-q4kgn-6vthw                       newcl2          md-04-newcl2-q4kgn-6vthw                       openstack:///710a7b00-30d2-4301-a0e5-9671c3fb7587   Running   3d4h    v1.29.7
+md-04-newcl2-q4kgn-vtctt                       newcl2          md-04-newcl2-q4kgn-vtctt                       openstack:///06bc7a78-1fbd-46c3-a91e-1fc6dcf9d216   Running   3d4h    v1.29.7
+md-dc2-cluster-alldc-2c4g-intel-vwvc6-6qqzk    cluster-alldc   md-dc2-cluster-alldc-2c4g-intel-vwvc6-6qqzk    openstack:///45f4a0b1-0c77-47f5-a4d5-f02089f7e427   Running   43m     v1.29.7
+md-dc2-cluster-alldc-2c4g-intel-vwvc6-wvd9t    cluster-alldc   md-dc2-cluster-alldc-2c4g-intel-vwvc6-wvd9t    openstack:///7b978e7c-c530-4381-bf13-561cec71a121   Running   43m     v1.29.7
+md-dc2-cluster-alldc-8c16g-intel-244dg-8qm6q   cluster-alldc   md-dc2-cluster-alldc-8c16g-intel-244dg-8qm6q   openstack:///438ac373-91d4-429d-86d6-98b691ec230f   Running   43m     v1.29.7
+md-dc2-cluster-alldc-8c16g-intel-244dg-svvx7   cluster-alldc   md-dc2-cluster-alldc-8c16g-intel-244dg-svvx7   openstack:///d88e4ec8-1fb2-426b-9870-a8b5a32b7f9f   Running   43m     v1.29.7
+md-dc3-cluster-alldc-2c4g-intel-f75hc-9rlps    cluster-alldc   md-dc3-cluster-alldc-2c4g-intel-f75hc-9rlps    openstack:///ae6ee7df-e0f7-4df8-97e3-86d57c7b664d   Running   43m     v1.29.7
+md-dc3-cluster-alldc-2c4g-intel-f75hc-c4d6b    cluster-alldc   md-dc3-cluster-alldc-2c4g-intel-f75hc-c4d6b    openstack:///3ebb37a9-3668-4fc3-bbed-6c5bc77cae02   Running   43m     v1.29.7
+md-dc4-cluster-alldc-2c4g-intel-62jg5-c7mvd    cluster-alldc   md-dc4-cluster-alldc-2c4g-intel-62jg5-c7mvd    openstack:///26e34941-34c5-4ef6-8650-1e19e4986caa   Running   43m     v1.29.7
+md-dc4-cluster-alldc-2c4g-intel-62jg5-vb46k    cluster-alldc   md-dc4-cluster-alldc-2c4g-intel-62jg5-vb46k    openstack:///665268ce-2156-4364-809a-e1ce6c248574   Running   43m     v1.29.7
+md-dc4-cluster-alldc-8c16g-amd-7kwb8-7t4dn     cluster-alldc   md-dc4-cluster-alldc-8c16g-amd-7kwb8-7t4dn     openstack:///5a933a2e-b705-4a83-8854-4127d0d62a24   Running   43m     v1.29.7
+md-dc4-cluster-alldc-8c16g-amd-7kwb8-w44ss     cluster-alldc   md-dc4-cluster-alldc-8c16g-amd-7kwb8-w44ss     openstack:///1b7f7723-6846-4318-a471-17de07663b80   Running   43m     v1.29.7
+```
+
+```
+clusterctl describe cluster cluster-alldc
+NAME                                                              READY  SEVERITY  REASON  SINCE  MESSAGE                                                                                        
+Cluster/cluster-alldc                                             True                     61m                                                                                                    
+├─ClusterInfrastructure - OpenStackCluster/osc-dc4-cluster-alldc                                                                                                                                  
+├─ControlPlane - KamajiControlPlane/ktcp-cluster-alldc                                                                                                                                            
+└─Workers                                                                                                                                                                                         
+  ├─MachineDeployment/md-dc2-cluster-alldc-2c4g-intel             True                     58m                                                                                                    
+  │ └─2 Machines...                                               True                     60m    See md-dc2-cluster-alldc-2c4g-intel-vwvc6-6qqzk, md-dc2-cluster-alldc-2c4g-intel-vwvc6-wvd9t    
+  ├─MachineDeployment/md-dc2-cluster-alldc-8c16g-intel            True                     58m                                                                                                    
+  │ └─2 Machines...                                               True                     60m    See md-dc2-cluster-alldc-8c16g-intel-244dg-8qm6q, md-dc2-cluster-alldc-8c16g-intel-244dg-svvx7  
+  ├─MachineDeployment/md-dc3-cluster-alldc-2c4g-intel             True                     58m                                                                                                    
+  │ └─2 Machines...                                               True                     60m    See md-dc3-cluster-alldc-2c4g-intel-f75hc-9rlps, md-dc3-cluster-alldc-2c4g-intel-f75hc-c4d6b    
+  ├─MachineDeployment/md-dc4-cluster-alldc-2c4g-intel             True                     58m                                                                                                    
+  │ └─2 Machines...                                               True                     60m    See md-dc4-cluster-alldc-2c4g-intel-62jg5-c7mvd, md-dc4-cluster-alldc-2c4g-intel-62jg5-vb46k    
+  └─MachineDeployment/md-dc4-cluster-alldc-8c16g-amd              True                     58m                                                                                                    
+    └─2 Machines...                                               True                     61m    See md-dc4-cluster-alldc-8c16g-amd-7kwb8-7t4dn, md-dc4-cluster-alldc-8c16g-amd-7kwb8-w44ss 
+```
