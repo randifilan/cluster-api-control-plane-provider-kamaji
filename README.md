@@ -448,12 +448,6 @@ machinehealthcheck.cluster.x-k8s.io/mhcs-cluster-alldc-node-unhealthy-5m created
 kubectl get machine
 
 NAME                                           CLUSTER         NODENAME                                       PROVIDERID                                          PHASE     AGE     VERSION
-md-02-newcl2-dg25j-hrl9n                       newcl2          md-02-newcl2-dg25j-hrl9n                       openstack:///fb81232f-4f09-4fb7-bb9a-edd61e3bda8a   Running   3d4h    v1.29.7
-md-02-newcl2-dg25j-wtbhh                       newcl2          md-02-newcl2-dg25j-wtbhh                       openstack:///c6dd6ec8-7a90-42f2-bdd7-cf7e29c3e377   Running   3d4h    v1.29.7
-md-03-newcl2-l5x69-h78gm                       newcl2                                                                                                             Pending   7m9s    v1.29.7s
-md-03-newcl2-l5x69-rtw8s                       newcl2                                                                                                             Pending   6m53s   v1.29.7s
-md-04-newcl2-q4kgn-6vthw                       newcl2          md-04-newcl2-q4kgn-6vthw                       openstack:///710a7b00-30d2-4301-a0e5-9671c3fb7587   Running   3d4h    v1.29.7
-md-04-newcl2-q4kgn-vtctt                       newcl2          md-04-newcl2-q4kgn-vtctt                       openstack:///06bc7a78-1fbd-46c3-a91e-1fc6dcf9d216   Running   3d4h    v1.29.7
 md-dc2-cluster-alldc-2c4g-intel-vwvc6-6qqzk    cluster-alldc   md-dc2-cluster-alldc-2c4g-intel-vwvc6-6qqzk    openstack:///45f4a0b1-0c77-47f5-a4d5-f02089f7e427   Running   43m     v1.29.7
 md-dc2-cluster-alldc-2c4g-intel-vwvc6-wvd9t    cluster-alldc   md-dc2-cluster-alldc-2c4g-intel-vwvc6-wvd9t    openstack:///7b978e7c-c530-4381-bf13-561cec71a121   Running   43m     v1.29.7
 md-dc2-cluster-alldc-8c16g-intel-244dg-8qm6q   cluster-alldc   md-dc2-cluster-alldc-8c16g-intel-244dg-8qm6q   openstack:///438ac373-91d4-429d-86d6-98b691ec230f   Running   43m     v1.29.7
